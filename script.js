@@ -1,93 +1,121 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const contrastBtn = document.getElementById('contrast-toggle');
-  const increaseFontBtn = document.getElementById('increase-font');
-  const decreaseFontBtn = document.getElementById('decrease-font');
-  const resetFontBtn = document.getElementById('reset-font');
+  const btnContrast = document.getElementById('btn-contrast');
+  const btnFontUp = document.getElementById('btn-font-up');
+  const btnFontDown = document.getElementById('btn-font-down');
+  const btnFontReset = document.getElementById('btn-font-reset');
+  const btnTts = document.getElementById('btn-tts');
   const urlForm = document.getElementById('url-form');
   const urlInput = document.getElementById('url-input');
-  const resultMessage = document.getElementById('result-message');
+  const resultBox = document.getElementById('result-box');
 
-  // Gerenciamento do Tamanho do Texto com Persistência
-  let fontScale = parseFloat(localStorage.getItem('fontScale')) || 1.1;
+  // Controladores de estado
+  let fontMultiplier = parseFloat(localStorage.getItem('fontMultiplier')) || 1.0;
+  let isSpeaking = false;
 
-  const updateFontScale = () => {
-    document.documentElement.style.setProperty('--font-scale', `${fontScale}rem`);
-    localStorage.setItem('fontScale', fontScale);
+  // 1. Gerenciamento do Tamanho da Fonte
+  const applyFontScale = () => {
+    document.documentElement.style.fontSize = `${100 * fontMultiplier}%`;
+    localStorage.setItem('fontMultiplier', fontMultiplier);
   };
-  updateFontScale();
+  applyFontScale();
 
-  // Restaurar Preferência de Alto Contraste
+  btnFontUp.addEventListener('click', () => {
+    if (fontMultiplier < 1.5) { fontMultiplier += 0.1; applyFontScale(); }
+  });
+
+  btnFontDown.addEventListener('click', () => {
+    if (fontMultiplier > 0.8) { fontMultiplier -= 0.1; applyFontScale(); }
+  });
+
+  btnFontReset.addEventListener('click', () => {
+    fontMultiplier = 1.0;
+    applyFontScale();
+  });
+
+  // 2. Alto Contraste
   if (localStorage.getItem('highContrast') === 'true') {
     document.body.classList.add('high-contrast');
-    contrastBtn.setAttribute('aria-pressed', 'true');
+    btnContrast.setAttribute('aria-pressed', 'true');
   }
 
-  contrastBtn.addEventListener('click', () => {
-    const isHighContrast = document.body.classList.toggle('high-contrast');
-    contrastBtn.setAttribute('aria-pressed', isHighContrast);
-    localStorage.setItem('highContrast', isHighContrast);
+  btnContrast.addEventListener('click', () => {
+    const isHigh = document.body.classList.toggle('high-contrast');
+    btnContrast.setAttribute('aria-pressed', isHigh);
+    localStorage.setItem('highContrast', isHigh);
   });
 
-  increaseFontBtn.addEventListener('click', () => {
-    if (fontScale < 1.8) {
-      fontScale += 0.1;
-      updateFontScale();
-    }
-  });
-
-  decreaseFontBtn.addEventListener('click', () => {
-    if (fontScale > 0.8) {
-      fontScale -= 0.1;
-      updateFontScale();
-    }
-  });
-
-  resetFontBtn.addEventListener('click', () => {
-    fontScale = 1.1;
-    updateFontScale();
-  });
-
-  // Análise Avançada da URL
-  urlForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const rawInput = urlInput.value.trim();
-
-    if (!rawInput) {
-      resultMessage.textContent = 'Aviso: Por favor, digite um endereço para verificação.';
+  // 3. Leitor de Áudio (Text-to-Speech) integrado
+  btnTts.addEventListener('click', () => {
+    if (!('speechSynthesis' in window)) {
+      alert('Seu navegador não suporta leitura em áudio.');
       return;
     }
 
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      btnTts.textContent = '🔊 Ouvir Página';
+      return;
+    }
+
+    const textToRead = document.querySelector('main').innerText;
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 0.95;
+
+    utterance.onend = () => {
+      isSpeaking = false;
+      btnTts.textContent = '🔊 Ouvir Página';
+    };
+
+    window.speechSynthesis.speak(utterance);
+    isSpeaking = true;
+    btnTts.textContent = '⏹️ Parar Leitura';
+  });
+
+  // 4. Validador Avançado de Links
+  urlForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const rawUrl = urlInput.value.trim();
+
+    if (!rawUrl) return;
+
     try {
-      const formattedUrl = rawInput.startsWith('http://') || rawInput.startsWith('https://')
-        ? rawInput
-        : `https://${rawInput}`;
+      const formatted = rawUrl.startsWith('http://') || rawUrl.startsWith('https://') 
+        ? rawUrl 
+        : `https://${rawUrl}`;
 
-      const parsedUrl = new URL(formattedUrl);
-      const host = parsedUrl.hostname;
-      const alerts = [];
+      const parsed = new URL(formatted);
+      const host = parsed.hostname.toLowerCase();
+      const flags = [];
 
-      // 1. Checagem de Conexão Segura
-      if (parsedUrl.protocol === 'http:') {
-        alerts.push('ALERTA DE SEGURANÇA: O site não possui criptografia segura (HTTP). Não digite dados sensíveis.');
+      if (parsed.protocol === 'http:') {
+        flags.push('Site não seguro: não possui criptografia HTTPS.');
       }
-
-      // 2. Checagem de IP direto no domínio
-      if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) {
-        alerts.push('ATENÇÃO: O link utiliza um número de IP direto em vez de um nome de domínio. Isso é muito comum em golpes.');
+      if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) {
+        flags.push('Endereço suspeito: o link é um número de IP em vez de um nome de domínio.');
       }
-
-      // 3. Checagem de números em substituição de letras (ex: banc0 em vez de banco)
       if (/\d/.test(host) && (host.includes('0') || host.includes('1'))) {
-        alerts.push('CUIDADO: O endereço contém números que podem estar substituindo letras (como "0" no lugar de "O"). Confirme a grafia.');
+        flags.push('Atenção para substituição de letras por números (ex: 0 no lugar de O).');
       }
 
-      if (alerts.length > 0) {
-        resultMessage.textContent = alerts.join(' ');
-      } else {
-        resultMessage.textContent = `ANÁLISE OK: O site utiliza protocolo seguro (${parsedUrl.protocol.toUpperCase()}) e estrutura de domínio padronizada (${host}). Lembre-se de sempre checar se o nome pertence à empresa oficial.`;
+      const suspiciousTLDs = ['.xyz', '.top', '.zip', '.club', '.online'];
+      if (suspiciousTLDs.some(tld => host.endsWith(tld))) {
+        flags.push('Final de domínio com histórico elevado de uso para golpes.');
       }
-    } catch (err) {
-      resultMessage.textContent = 'Erro: Digite um formato de endereço válido (exemplo: site.com.br).';
+
+      resultBox.hidden = false;
+      if (flags.length > 0) {
+        resultBox.className = 'status-card danger';
+        resultBox.innerHTML = `⚠️ <strong>ALERTA DE SEGURANÇA:</strong><br>${flags.join('<br>')}`;
+      } else {
+        resultBox.className = 'status-card success';
+        resultBox.innerHTML = `✅ <strong>ESTRUTURA VÁLIDA:</strong> O link usa protocolo seguro e estrutura comum (${host}). Sempre verifique se o nome bate com o da instituição.`;
+      }
+    } catch {
+      resultBox.hidden = false;
+      resultBox.className = 'status-card danger';
+      resultBox.innerHTML = '❌ <strong>ERRO:</strong> Digite um endereço válido (exemplo: site.com.br).';
     }
   });
 });
