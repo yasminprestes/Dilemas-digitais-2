@@ -2,42 +2,92 @@ document.addEventListener('DOMContentLoaded', () => {
   const contrastBtn = document.getElementById('contrast-toggle');
   const increaseFontBtn = document.getElementById('increase-font');
   const decreaseFontBtn = document.getElementById('decrease-font');
-  const checkBtn = document.getElementById('check-btn');
+  const resetFontBtn = document.getElementById('reset-font');
+  const urlForm = document.getElementById('url-form');
   const urlInput = document.getElementById('url-input');
   const resultMessage = document.getElementById('result-message');
 
-  let currentFontSize = 20;
+  // Gerenciamento do Tamanho do Texto com Persistência
+  let fontScale = parseFloat(localStorage.getItem('fontScale')) || 1.1;
+
+  const updateFontScale = () => {
+    document.documentElement.style.setProperty('--font-scale', `${fontScale}rem`);
+    localStorage.setItem('fontScale', fontScale);
+  };
+  updateFontScale();
+
+  // Restaurar Preferência de Alto Contraste
+  if (localStorage.getItem('highContrast') === 'true') {
+    document.body.classList.add('high-contrast');
+    contrastBtn.setAttribute('aria-pressed', 'true');
+  }
 
   contrastBtn.addEventListener('click', () => {
-    document.body.classList.toggle('high-contrast');
+    const isHighContrast = document.body.classList.toggle('high-contrast');
+    contrastBtn.setAttribute('aria-pressed', isHighContrast);
+    localStorage.setItem('highContrast', isHighContrast);
   });
 
   increaseFontBtn.addEventListener('click', () => {
-    if (currentFontSize < 32) {
-      currentFontSize += 2;
-      document.documentElement.style.setProperty('--font-size', `${currentFontSize}px`);
+    if (fontScale < 1.8) {
+      fontScale += 0.1;
+      updateFontScale();
     }
   });
 
   decreaseFontBtn.addEventListener('click', () => {
-    if (currentFontSize > 16) {
-      currentFontSize -= 2;
-      document.documentElement.style.setProperty('--font-size', `${currentFontSize}px`);
+    if (fontScale > 0.8) {
+      fontScale -= 0.1;
+      updateFontScale();
     }
   });
 
-  checkBtn.addEventListener('click', () => {
-    const url = urlInput.value.trim().toLowerCase();
+  resetFontBtn.addEventListener('click', () => {
+    fontScale = 1.1;
+    updateFontScale();
+  });
 
-    if (!url) {
-      resultMessage.textContent = 'Por favor, digite ou cole um endereço de site.';
+  // Análise Avançada da URL
+  urlForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const rawInput = urlInput.value.trim();
+
+    if (!rawInput) {
+      resultMessage.textContent = 'Aviso: Por favor, digite um endereço para verificação.';
       return;
     }
 
-    if (!url.startsWith('https://')) {
-      resultMessage.textContent = 'Atenção: Este site não usa conexão segura (HTTPS). Evite inserir dados pessoais.';
-    } else {
-      resultMessage.textContent = 'O site possui criptografia básica (HTTPS). Lembre-se de conferir se o nome do domínio está correto.';
+    try {
+      const formattedUrl = rawInput.startsWith('http://') || rawInput.startsWith('https://')
+        ? rawInput
+        : `https://${rawInput}`;
+
+      const parsedUrl = new URL(formattedUrl);
+      const host = parsedUrl.hostname;
+      const alerts = [];
+
+      // 1. Checagem de Conexão Segura
+      if (parsedUrl.protocol === 'http:') {
+        alerts.push('ALERTA DE SEGURANÇA: O site não possui criptografia segura (HTTP). Não digite dados sensíveis.');
+      }
+
+      // 2. Checagem de IP direto no domínio
+      if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) {
+        alerts.push('ATENÇÃO: O link utiliza um número de IP direto em vez de um nome de domínio. Isso é muito comum em golpes.');
+      }
+
+      // 3. Checagem de números em substituição de letras (ex: banc0 em vez de banco)
+      if (/\d/.test(host) && (host.includes('0') || host.includes('1'))) {
+        alerts.push('CUIDADO: O endereço contém números que podem estar substituindo letras (como "0" no lugar de "O"). Confirme a grafia.');
+      }
+
+      if (alerts.length > 0) {
+        resultMessage.textContent = alerts.join(' ');
+      } else {
+        resultMessage.textContent = `ANÁLISE OK: O site utiliza protocolo seguro (${parsedUrl.protocol.toUpperCase()}) e estrutura de domínio padronizada (${host}). Lembre-se de sempre checar se o nome pertence à empresa oficial.`;
+      }
+    } catch (err) {
+      resultMessage.textContent = 'Erro: Digite um formato de endereço válido (exemplo: site.com.br).';
     }
   });
 });
