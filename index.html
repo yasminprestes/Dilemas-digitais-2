@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Acessibilidade e Prevenção a Golpes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Prevenção a Golpes Digitais</h1>
+    <div class="accessibility-toolbar" aria-label="Ferramentas de acessibilidade">
+      <button id="contrast-toggle" aria-label="Alternar modo de alto contraste">Alto Contraste</button>
+      <button id="increase-font" aria-label="Aumentar o tamanho do texto">A+</button>
+      <button id="decrease-font" aria-label="Diminuir o tamanho do texto">A-</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="info-card">
+      <h2>Dicas para Identificar Golpes</h2>
+      <ul>
+        <li><strong>Mensagens Urgentes:</strong> Golpistas criam senso de urgência para impedir o raciocínio frio.</li>
+        <li><strong>Links Suspeitos:</strong> Verifique sempre se a URL é exatamente a do banco ou serviço oficial.</li>
+        <li><strong>Solicitação de Senhas:</strong> Instituições sérias nunca pedem senhas ou códigos por ligação ou mensagem.</li>
+      </ul>
+    </section>
+
+    <section class="info-card">
+      <h2>Verificador Rápido de Segurança de URL</h2>
+      <label for="url-input">Cole o endereço do site que deseja verificar:</label>
+      <input type="text" id="url-input" placeholder="https://exemplo.com">
+      <button id="check-btn">Verificar Conexão</button>
+      <p id="result-message" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
