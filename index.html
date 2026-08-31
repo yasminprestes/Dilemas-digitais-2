@@ -7,31 +7,45 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
+  <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+  <header role="banner">
     <h1>Prevenção a Golpes Digitais</h1>
-    <div class="accessibility-toolbar" aria-label="Ferramentas de acessibilidade">
-      <button id="contrast-toggle" aria-label="Alternar modo de alto contraste">Alto Contraste</button>
-      <button id="increase-font" aria-label="Aumentar o tamanho do texto">A+</button>
-      <button id="decrease-font" aria-label="Diminuir o tamanho do texto">A-</button>
-    </div>
+    <nav aria-label="Ferramentas de acessibilidade">
+      <div class="accessibility-toolbar">
+        <button id="contrast-toggle" aria-pressed="false">Alto Contraste</button>
+        <button id="increase-font" aria-label="Aumentar o tamanho do texto">A+</button>
+        <button id="decrease-font" aria-label="Diminuir o tamanho do texto">A-</button>
+        <button id="reset-font" aria-label="Restaurar tamanho do texto">A</button>
+      </div>
+    </nav>
   </header>
 
-  <main>
-    <section class="info-card">
-      <h2>Dicas para Identificar Golpes</h2>
+  <main id="main-content">
+    <section class="info-card" aria-labelledby="sec-dicas">
+      <h2 id="sec-dicas">Dicas Importantes de Segurança</h2>
       <ul>
-        <li><strong>Mensagens Urgentes:</strong> Golpistas criam senso de urgência para impedir o raciocínio frio.</li>
-        <li><strong>Links Suspeitos:</strong> Verifique sempre se a URL é exatamente a do banco ou serviço oficial.</li>
-        <li><strong>Solicitação de Senhas:</strong> Instituições sérias nunca pedem senhas ou códigos por ligação ou mensagem.</li>
+        <li><strong>Mensagens Urgentes:</strong> Desconfie de solicitações com prazos muito curtos para pagamentos ou transferências.</li>
+        <li><strong>Erros na URL:</strong> Golpistas usam endereços parecidos para enganar o usuário (exemplo: usar <em>banc0.com</em> em vez de <em>banco.com</em>).</li>
+        <li><strong>Solicitação de Dados:</strong> Nenhuma instituição financeira solicita senhas ou códigos de confirmação por telefone ou aplicativo.</li>
       </ul>
     </section>
 
-    <section class="info-card">
-      <h2>Verificador Rápido de Segurança de URL</h2>
-      <label for="url-input">Cole o endereço do site que deseja verificar:</label>
-      <input type="text" id="url-input" placeholder="https://exemplo.com">
-      <button id="check-btn">Verificar Conexão</button>
-      <p id="result-message" aria-live="polite"></p>
+    <section class="info-card" aria-labelledby="sec-verificador">
+      <h2 id="sec-verificador">Verificador Rápido de URL</h2>
+      <form id="url-form">
+        <label for="url-input">Cole o endereço web para análise:</label>
+        <input 
+          type="text" 
+          id="url-input" 
+          placeholder="exemplo.com ou https://exemplo.com" 
+          required 
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button type="submit" id="check-btn">Analisar Link</button>
+      </form>
+      <div id="result-message" class="status-box" aria-live="polite" role="status"></div>
     </section>
   </main>
 
