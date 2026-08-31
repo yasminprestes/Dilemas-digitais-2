@@ -3,49 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal de Acessibilidade e Prevenção a Golpes</title>
+  <meta name="description" content="Ferramenta acessível para verificação de links e prevenção contra golpes digitais.">
+  <title>Portal Acessível: Prevenção a Golpes</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
-  <header role="banner">
-    <h1>Prevenção a Golpes Digitais</h1>
-    <nav aria-label="Ferramentas de acessibilidade">
-      <div class="accessibility-toolbar">
-        <button id="contrast-toggle" aria-pressed="false">Alto Contraste</button>
-        <button id="increase-font" aria-label="Aumentar o tamanho do texto">A+</button>
-        <button id="decrease-font" aria-label="Diminuir o tamanho do texto">A-</button>
-        <button id="reset-font" aria-label="Restaurar tamanho do texto">A</button>
-      </div>
-    </nav>
+  <header class="app-header">
+    <div class="header-container">
+      <h1>Guardião Digital</h1>
+      
+      <nav aria-label="Acessibilidade e Leitura">
+        <div class="toolbar">
+          <button id="btn-tts" class="btn btn-secondary" aria-label="Ouvir conteúdo da página em áudio">
+            🔊 Ouvir Página
+          </button>
+          <button id="btn-contrast" class="btn btn-secondary" aria-pressed="false">
+            🎨 Alto Contraste
+          </button>
+          <div class="font-controls" role="group" aria-label="Ajustar tamanho do texto">
+            <button id="btn-font-down" class="btn btn-small" aria-label="Diminuir texto">A-</button>
+            <button id="btn-font-reset" class="btn btn-small" aria-label="Restaurar tamanho do texto">A</button>
+            <button id="btn-font-up" class="btn btn-small" aria-label="Aumentar texto">A+</button>
+          </div>
+        </div>
+      </nav>
+    </div>
   </header>
 
-  <main id="main-content">
-    <section class="info-card" aria-labelledby="sec-dicas">
-      <h2 id="sec-dicas">Dicas Importantes de Segurança</h2>
-      <ul>
-        <li><strong>Mensagens Urgentes:</strong> Desconfie de solicitações com prazos muito curtos para pagamentos ou transferências.</li>
-        <li><strong>Erros na URL:</strong> Golpistas usam endereços parecidos para enganar o usuário (exemplo: usar <em>banc0.com</em> em vez de <em>banco.com</em>).</li>
-        <li><strong>Solicitação de Dados:</strong> Nenhuma instituição financeira solicita senhas ou códigos de confirmação por telefone ou aplicativo.</li>
-      </ul>
+  <main id="main-content" class="container">
+    <section class="card" aria-labelledby="title-verificador">
+      <h2 id="title-verificador">Analisador de Links Suspeitos</h2>
+      <p>Cole o link que você recebeu por WhatsApp, e-mail ou SMS para checar os riscos antes de clicar.</p>
+      
+      <form id="url-form" class="url-form" novalidate>
+        <div class="field-group">
+          <label for="url-input" class="form-label">Endereço da Web (URL):</label>
+          <input 
+            type="text" 
+            id="url-input" 
+            class="form-input" 
+            placeholder="Exemplo: site-banco.com.br" 
+            required
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="url-hint"
+          >
+          <span id="url-hint" class="hint-text">Cole o link completo ou apenas o nome do site.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-large">Verificar Link Agora</button>
+      </form>
+
+      <output id="result-box" class="status-card" aria-live="assertive" role="alert" hidden></output>
     </section>
 
-    <section class="info-card" aria-labelledby="sec-verificador">
-      <h2 id="sec-verificador">Verificador Rápido de URL</h2>
-      <form id="url-form">
-        <label for="url-input">Cole o endereço web para análise:</label>
-        <input 
-          type="text" 
-          id="url-input" 
-          placeholder="exemplo.com ou https://exemplo.com" 
-          required 
-          autocomplete="off"
-          spellcheck="false"
-        >
-        <button type="submit" id="check-btn">Analisar Link</button>
-      </form>
-      <div id="result-message" class="status-box" aria-live="polite" role="status"></div>
+    <section class="card" aria-labelledby="title-dicas">
+      <h2 id="title-dicas">Sinais Claros de Golpes Digitais</h2>
+      <ul class="tips-grid">
+        <li class="tip-item">
+          <strong>Urgência Excessiva:</strong> Mensagens como "Bloqueio em 2 horas" ou "Última chance" tentam impedir que você pense com calma.
+        </li>
+        <li class="tip-item">
+          <strong>Troca de Letras por Números:</strong> Atenção a links que trocam a letra "O" por zero ("0") ou "L" por um ("1").
+        </li>
+        <li class="tip-item">
+          <strong>Pagamentos via PIX para Terceiros:</strong> Bancos nunca pedem transferência em nome de pessoas físicas para "cancelar operações".
+        </li>
+      </ul>
     </section>
   </main>
 
